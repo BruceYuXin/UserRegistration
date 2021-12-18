@@ -1,0 +1,12 @@
+<assembly>
+    <id>release</id>
+    <formats>
+        <format>jar</format>
+    </formats>
+    <includeBaseDirectory>true</includeBaseDirectory>
+    <dependencySets>
+        <dependencySet>
+            <outputDirectory>${project.basedir}/target/lib</outputDirectory>
+        </dependencySet>
+    </dependencySets>
+</assembly>

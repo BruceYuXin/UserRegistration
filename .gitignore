@@ -1,6 +1,16 @@
 # Compiled class file
 *.class
 
+*.DS_Store
+
+.idea
+
+target/
+
+mvnw
+
+mvnw.cmd
+
 # Log file
 *.log
 

@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE generatorConfiguration
+  PUBLIC "-//mybatis.org//DTD MyBatis Generator Configuration 1.0//EN"
+  "http://mybatis.org/dtd/mybatis-generator-config_1_0.dtd">
+<generatorConfiguration>
+  <context id="UserRegistrationTables" targetRuntime="MyBatis3">
+    <plugin type="org.mybatis.generator.plugins.ToStringPlugin" />
+    <plugin type="org.mybatis.generator.plugins.SerializablePlugin" />
+
+    <jdbcConnection driverClass="com.mysql.jdbc.Driver"
+        connectionURL="jdbc:mysql://127.0.0.1:3306/user_registration"
+        userId="root"
+        password="">
+    </jdbcConnection>
+
+    <javaTypeResolver >
+      <property name="forceBigDecimals" value="false" />
+    </javaTypeResolver>
+
+    <javaModelGenerator targetPackage="com.example.userregistration.entity" targetProject="src/main/java">
+      <property name="enableSubPackages" value="false" />
+      <property name="trimStrings" value="true" />
+    </javaModelGenerator>
+
+    <sqlMapGenerator targetPackage="com.example.userregistration.dao"  targetProject="src/main/java">
+      <property name="enableSubPackages" value="false" />
+    </sqlMapGenerator>
+
+    <!-- The XMLMAPPER is used for MyBatis3 and would produce XML files -->
+    <javaClientGenerator type="XMLMAPPER" targetPackage="com.example.userregistration.dao"  targetProject="src/main/java">
+      <property name="enableSubPackages" value="false" />
+    </javaClientGenerator>
+
+    <!-- Generate all tables -->
+    <!--<table schema="user_registration" tableName="%">-->
+    <table schema="user_registration" tableName="customers">
+      <property name="useActualColumnNames" value="true"/>
+      <generatedKey column="ID" sqlStatement="Mysql" identity="true" />
+      <columnOverride column="LONG_VARCHAR_FIELD" jdbcType="VARCHAR" />
+    </table>
+  </context>
+</generatorConfiguration>
