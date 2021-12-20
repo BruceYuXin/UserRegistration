@@ -4,8 +4,8 @@ spring:
   datasource:
     one:
       driver-class-name: com.mysql.jdbc.Driver
-      #jdbc-url: jdbc:mysql://172.16.238.12:3306/user_registration?characterEncoding=utf-8&useSSL=false&zeroDateTimeBehavior=CONVERT_TO_NULL
-      jdbc-url: jdbc:mysql://localhost:3306/user_registration?characterEncoding=utf-8&useSSL=false&zeroDateTimeBehavior=CONVERT_TO_NULL
+      jdbc-url: jdbc:mysql://172.16.238.12:3306/user_registration?characterEncoding=utf-8&useSSL=false&zeroDateTimeBehavior=CONVERT_TO_NULL
+      #jdbc-url: jdbc:mysql://localhost:3306/user_registration?characterEncoding=utf-8&useSSL=false&zeroDateTimeBehavior=CONVERT_TO_NULL
       username: root
       password:
       max-idle: 10
@@ -14,8 +14,8 @@ spring:
       initial-size: 5
   redis:
     database: 0
-    #host: 172.16.238.11
-    host: 127.0.0.1
+    host: 172.16.238.11
+    #host: 127.0.0.1
     port: 6379
     password:
     timeout: 30000
@@ -25,4 +25,43 @@ spring:
         max-wait: -1
         max-idle: 8
         min-idle: 0
+  kafka:
+    bootstrap-servers: 172.16.238.14:9092
+    #bootstrap-servers: localhost:9092
+    producer:
+      retries: 3
+      acks: all
+      batch-size: 16384
+      properties:
+        linger:
+          ms: 10
+      buffer-memory: 33554432
+      enable:
+        idempotence: true
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
+      compression:
+        type: gzip
+    listener:
+      ack-mode: manual
+    consumer:
+      properties:
+        group:
+          id: defaultConsumerGroup
+        session:
+          timeout:
+            ms: 6000
+        request:
+          timeout:
+            ms: 6000
+      enable-auto-commit: false
+      max-poll-records: 5000
+      auto-offset-reset: latest
+      isolation:
+        level: read_committed
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+
+
+
 

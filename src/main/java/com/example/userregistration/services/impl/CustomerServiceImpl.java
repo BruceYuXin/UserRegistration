@@ -6,6 +6,7 @@ import com.example.userregistration.dao.CustomersMapper;
 import com.example.userregistration.entity.Customers;
 import com.example.userregistration.entity.CustomersExample;
 import com.example.userregistration.services.CustomerService;
+import com.example.userregistration.services.MailService;
 import com.example.userregistration.services.RedisService;
 import com.example.userregistration.utils.DateUtil;
 import com.mysql.cj.util.StringUtils;
@@ -16,12 +17,21 @@ import org.apache.ibatis.annotations.Param;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.kafka.support.SendResult;
+import org.springframework.lang.NonNull;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
+import org.springframework.util.concurrent.ListenableFuture;
+import org.springframework.util.concurrent.ListenableFutureCallback;
 
+import com.example.userregistration.configuration.Message;
+
+import javax.annotation.Resource;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @Slf4j
@@ -34,6 +44,12 @@ public class CustomerServiceImpl implements CustomerService {
 
     @Autowired
     private RedisService redisService;
+
+    @Autowired
+    private MailService mailService;
+
+    @Autowired
+    private KafkaTemplate<String, String> kafkaTemplate;
 
     @Override
     public List<Customers> findFirstCustomer() {
@@ -72,9 +88,30 @@ public class CustomerServiceImpl implements CustomerService {
             customers.setUpdate_date(createDate);
             int num = customersMapper.insert(customers);
             if (num == 1) {
-                String customerJSONStr = JSON.toJSON(customers).toString();
+
+                Message message = new Message();
+                message.setId(System.currentTimeMillis());
+                message.setMsg(JSON.toJSON(customers).toString());
+                message.setSendTime(new Date());
+
+                ListenableFuture<SendResult<String, String>> future = kafkaTemplate.send("userregistration", JSON.toJSON(customers).toString());
+                future.addCallback(new ListenableFutureCallback<SendResult<String, String>>() {
+                    @Override
+                    public void onFailure(@NonNull Throwable throwable) {
+                        //错误结果
+                        log.info("+++++++++++++++++++++  Errors happened when sending message : " + throwable.getMessage());
+                    }
+                    @Override
+                    public void onSuccess(SendResult<String, String> result) {
+                        //正确结果
+                        log.info("+++++++++++++++++++++  Success in sending message : " + result.getProducerRecord());
+                    }
+                });
+
+                /*String customerJSONStr = JSON.toJSON(customers).toString();
                 redisService.setCustomer(customers.getUsername(), customerJSONStr);
                 redisService.setCustomer(customers.getEmail(), customerJSONStr);
+                mailService.sendMail(customers.getEmail());*/
                 return customers.getUsername() + " is successfully registered.";
             } else {
                 return customers.getUsername() + " fail to be registered.";
@@ -158,8 +195,9 @@ public class CustomerServiceImpl implements CustomerService {
         JSONArray jsonArray = new JSONArray();
         String customerJSONStr = redisService.getCustomer(email);
         if (StringUtils.isNullOrEmpty(customerJSONStr)) {
-            List<Customers> resultList = findCustomerByEmailLike(email);
+            List<Customers> resultList = findCustomerByEmail(email);
             if (CollectionUtils.isEmpty(resultList)) {
+                log.info("Do not find {} in Database", email);
                 return "no result is found.";
             } else {
                 for (Customers customers : resultList) {
@@ -171,6 +209,7 @@ public class CustomerServiceImpl implements CustomerService {
                 return jsonArray.toString();
             }
         } else {
+            log.info("Do not find {} in Redis", email);
             return customerJSONStr;
         }
     }

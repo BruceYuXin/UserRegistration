@@ -2,9 +2,13 @@ package com.example.userregistration;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.web.servlet.config.annotation.EnableWebMvc;
-import springfox.documentation.swagger2.annotations.EnableSwagger2;
 
+/**
+ *
+ * Swagger address :
+ * http://localhost:8080/swagger-ui.html
+ *
+ */
 @SpringBootApplication
 public class UserRegistrationApplication {
 

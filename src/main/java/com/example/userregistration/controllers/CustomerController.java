@@ -16,7 +16,7 @@ import io.swagger.annotations.ApiOperation;
 
 /**
  *
- * Swagger link :
+ * Swagger address :
  * http://localhost:8080/swagger-ui.html
  *
  */
@@ -33,9 +33,6 @@ public class CustomerController {
     @Autowired
     private RedisService redisService;
 
-    @Autowired
-    private MailService mailService;
-
     /**
      * {
      * "username": "test2",
@@ -48,6 +45,7 @@ public class CustomerController {
     @ApiOperation(value = "注册用户" ,  notes="新增注册")
     @RequestMapping(value = "/create", method = RequestMethod.POST)
     public String createCustomer(@RequestBody Customers customers) {
+        String createResult = StringUtil.EMPTY_STRING;
         if (StringUtil.isNullOrEmpty(customers.getUsername())) {
             return "Username can not be null";
         }
@@ -57,9 +55,8 @@ public class CustomerController {
         if (StringUtil.isNullOrEmpty(customers.getEmail())) {
             return "Email can not be null";
         }
-        customerService.createCustomer(customers);
-        mailService.sendMail(customers.getEmail());
-        return "success";
+        createResult = customerService.createCustomer(customers);
+        return createResult;
     }
 
     @ApiOperation(value = "根据 email 查询用户" ,  notes="根据 email 查询用户")
